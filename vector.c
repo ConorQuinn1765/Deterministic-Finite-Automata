@@ -3,7 +3,7 @@
 #include <string.h>
 #include "vector.h"
 
-const int MAX_STRING_SIZE = 1024;
+const int VECTOR_MAX_STRING = 1024;
 
 typedef struct vector
 {
@@ -34,7 +34,7 @@ VECTOR vectorInit(void)
 		
 		for(int i = 0; i < pVector->capacity; i++)
 		{
-			pVector->arr[i] = malloc(sizeof(char) * MAX_STRING_SIZE);
+			pVector->arr[i] = malloc(sizeof(char) * VECTOR_MAX_STRING);
 			if(!pVector->arr[i])
 			{
 				fprintf(stderr, "vectorInit - Failed to allocate space for all strings in the vector\n");
@@ -45,7 +45,7 @@ VECTOR vectorInit(void)
 				free(pVector);
 				return NULL;
 			}
-			memset(pVector->arr[i], 0, MAX_STRING_SIZE);
+			memset(pVector->arr[i], 0, VECTOR_MAX_STRING);
 		}
 	}
 	return (VECTOR)pVector;
@@ -147,7 +147,7 @@ void vectorPrint(VECTOR hVector)
 	if(pVector)
 	{
 		for(int i = 0; i < pVector->size; i++)
-			printf("%s\n", pVector->arr[i]);
+			printf("%s ", pVector->arr[i]);
 	}
 }
 
@@ -156,7 +156,7 @@ void vectorDestroy(VECTOR* phVector)
 	Vector* pVector = (Vector*)*phVector;
 	if(pVector)
 	{
-		for(int i = 0; i < pVector->size; i++)
+		for(int i = 0; i < pVector->capacity; i++)
 			free(pVector->arr[i]);
 
 		free(pVector->arr);
@@ -187,7 +187,7 @@ bool vectorExpand(Vector* pVector)
 	
 	for(int i = pVector->size; i < pVector->capacity * 2; i++)
 	{
-		temp[i] = malloc(sizeof(char) * MAX_STRING_SIZE);
+		temp[i] = malloc(sizeof(char) * VECTOR_MAX_STRING);
 		if(!temp[i])
 		{
 			fprintf(stderr, "vectorExpand - Failed to allocate new string locations. Vector invalid after %d\n", i);
@@ -222,7 +222,7 @@ bool vectorShrink(Vector* pVector)
 			
 			for(int i = pVector->capacity / 2; i < pVector->capacity; i++)
 			{
-				pVector->arr[i] = malloc(sizeof(char) * MAX_STRING_SIZE);
+				pVector->arr[i] = malloc(sizeof(char) * VECTOR_MAX_STRING);
 				if(!pVector->arr[i])
 				{
 					fprintf(stderr, "vectorShrink - Failed to reallocate freed string locations. Vector invalid after index %d\n", i);

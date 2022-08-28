@@ -1,6 +1,6 @@
 cc = gcc
 cflags = -Wall -Werror --std=c11 -g
-objs = main.o dfa.o map.o vector.o
+objs = main.o dfa.o mmap.o map.o vector.o
 exe = run
 
 $(exe): $(objs)
@@ -9,6 +9,8 @@ main.o: main.c dfa.o
 	$(cc) $(cflags) -c main.c
 dfa.o: dfa.c dfa.h map.o
 	$(cc) $(cflags) -c dfa.c
+mmap.o: mmap.c mmap.h map.o
+	$(cc) $(cflags) -c mmap.c
 map.o: map.c map.h
 	$(cc) $(cflags) -c map.c
 vector.o: vector.c vector.h

@@ -1,6 +1,5 @@
 #ifndef MAP_H
 #define MAP_H
-#include <stdlib.h>
 #include <stdbool.h>
 
 typedef void* MAP;
@@ -11,9 +10,9 @@ char* mapFind(MAP hNode, char* key);
 void mapDestroy(MAP* phNode);
 
 //      Output Functions        //
-void preOrderTraversal(MAP hNode);
-void inOrderTraversal(MAP hNode);
-void postOrderTraversal(MAP hNode);
+void mapPreOrderTraversal(MAP hNode);
+void mapInOrderTraversal(MAP hNode);
+void mapPostOrderTraversal(MAP hNode);
 
 
 #endif

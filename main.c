@@ -5,6 +5,8 @@ int main(void)
 {
     DFA dfa = dfaInit("dfa-files/m1.dfa", false);
     
-    printf("%p\n", dfa);
+    dfaPrint(dfa);
+    
+    dfaDestroy(&dfa);
     return 0;
 }
