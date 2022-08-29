@@ -1,6 +1,7 @@
 #ifndef DFA_H
 #define DFA_H
 #include <stdbool.h>
+#include "vector.h"
 
 typedef void* DFA;
 

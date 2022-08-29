@@ -1,11 +1,14 @@
 #ifndef MAP_H
 #define MAP_H
 #include <stdbool.h>
+#include "vector.h"
 
 typedef void* MAP;
 
 bool mapInsert(MAP* hNode, char* key, char* value);
 bool mapRemove(MAP* hNode, char* key);
+void mapKeys(MAP hNode, VECTOR keys);
+void mapValues(MAP hNode, VECTOR values);
 char* mapFind(MAP hNode, char* key);
 void mapDestroy(MAP* phNode);
 

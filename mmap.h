@@ -2,12 +2,14 @@
 #define MMAP_H
 #include <stdbool.h>
 #include "map.h"
+#include "vector.h"
 
 typedef void* MMAP;
 
 bool mmapInsert(MMAP* hNode, char* key);
 bool mmapSetValue(MMAP* hNode, char* key, MAP hMap);
 bool mmapRemove(MMAP* hNode, char* key);
+void mmapKeys(MMAP hNode, VECTOR hVector);
 MAP mmapFind(MMAP hNode, char* key);
 void mmapDestroy(MMAP* phNode);
 

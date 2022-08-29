@@ -15,12 +15,17 @@ typedef struct
     MMAP   transitions;     // Map of Map of strings
     char*  startState;
     VECTOR finalStates;     // Array of strings
+    bool verbose;
 }Dfa;
 
 /*****************************************
  *     Helper Function Declarations     *
 *****************************************/
 Dfa* readFile(Dfa* pDfa, char* filename);
+void printTransitions(Dfa* pDfa);
+VECTOR tokenizeString(char* string, VECTOR alphabet);
+int indexSubStr(char* haystack, char* needle, int startIndex);
+bool checkInvalidStrings(VECTOR alphabet, char* str);
 
 /*****************************************
  *       DFA Function Definitions       *
@@ -66,13 +71,79 @@ DFA dfaInit(char* filename, bool verbose)
         }
         
         dfa->transitions = NULL;
+        
+        dfa->verbose = verbose;
     }
     
-    return (DFA)readFile(dfa, filename);
+    dfa = readFile(dfa, filename);
+    
+    dfaPrint(dfa);
+    printf("\n");
+    
+    if(verbose)
+    {
+        dfaPrint(dfa);
+        printf("\n");
+    }
+    
+    return (DFA)dfa;
 }
 
 bool dfaAccepts(DFA hDfa, char* string)
 {
+    Dfa* pDfa = (Dfa*)hDfa;
+    if(pDfa)
+    {
+        if(!checkInvalidStrings(pDfa->alphabet, string))
+        {
+            printf("%s contains invalid characters --> Not Accepts\n", string);
+            return false;
+        }
+        
+        char* currState = malloc(sizeof(char) * DFA_MAX_STRING);
+        if(!currState)
+        {
+            fprintf(stderr, "dfaAccepts - Failed to create string\n");
+            return false;
+        }
+        memset(currState, 0, DFA_MAX_STRING);
+        strncpy(currState, pDfa->startState, strlen(pDfa->startState));
+        
+        VECTOR tokens = tokenizeString(string, pDfa->alphabet);
+        
+        for(int i = 0; i < vectorGetSize(tokens); i++)
+        {
+            MAP hMap = mmapFind(pDfa->transitions, currState);
+            char* newState = mapFind(hMap, vectorAt(tokens, i));
+            
+            if(pDfa->verbose)
+                printf("Curr State: %s\tSymbol: %s\tNew State: %s\n", currState, vectorAt(tokens, i), newState);
+            
+            memset(currState, 0, strlen(currState));
+            strncpy(currState, newState, strlen(newState));
+        }
+        
+        vectorDestroy(&tokens);
+        
+        for(int i = 0; i < vectorGetSize(pDfa->finalStates); i++)
+        {
+            if(strncmp(currState, vectorAt(pDfa->finalStates, i), strlen(currState)) == 0)
+            {
+                free(currState);
+                
+                printf("%s --> Accepts\n", string);
+                if(pDfa->verbose)
+                    printf("\n");
+                return true;
+            }
+        }
+        
+        free(currState);
+    }
+    
+    printf("%s --> Not Accepts\n", string);
+    if(pDfa->verbose)
+        printf("\n");
     return false;
 }
 
@@ -81,6 +152,7 @@ void dfaPrint(DFA hDfa)
     Dfa* pDfa = (Dfa*)hDfa;
     if(pDfa)
     {
+        printf("================ BEGIN DFA DEFINITION ================\n");
         printf("States: ");
         vectorPrint(pDfa->states);
         
@@ -93,7 +165,9 @@ void dfaPrint(DFA hDfa)
         vectorPrint(pDfa->finalStates);
         
         printf("\n\nTransitions:\n");
-        mmapInOrderTraversal(pDfa->transitions);   
+        printTransitions(pDfa);
+        //mmapInOrderTraversal(pDfa->transitions);
+        printf("================= END DFA DEFINITION =================\n");
     }
 }
 
@@ -186,4 +260,117 @@ Dfa* readFile(Dfa* pDfa, char* filename)
     fclose(fp);
     
     return pDfa;
+}
+
+void printTransitions(Dfa* pDfa)
+{
+    if(pDfa)
+    {
+        VECTOR keys = vectorInit();
+        
+        mmapKeys(pDfa->transitions, keys);
+        
+        for(int i = 0; i < vectorGetSize(keys); i++)
+        {
+            MAP hMap = mmapFind(pDfa->transitions, vectorAt(keys, i));
+            VECTOR tempKeys = vectorInit();
+            VECTOR tempValues = vectorInit();
+            
+            mapKeys(hMap, tempKeys);
+            mapValues(hMap, tempValues);
+            
+            for(int j = 0; j < vectorGetSize(tempKeys); j++)
+                printf("%s  %s  %s\n", vectorAt(keys, i), vectorAt(tempKeys, j), vectorAt(tempValues, j));
+            
+            vectorDestroy(&tempKeys);
+            vectorDestroy(&tempValues);
+        }
+        
+        vectorDestroy(&keys);
+    }
+}
+
+VECTOR tokenizeString(char* string, VECTOR alphabet)
+{
+    VECTOR hVector = vectorInit();
+    if(!hVector)
+        return NULL;
+        
+    char* tokens[DFA_MAX_STRING];
+    memset(tokens, 0, sizeof(char*) * DFA_MAX_STRING);
+        
+    for(int i = 0; i < vectorGetSize(alphabet); i++)
+    {
+        int index = indexSubStr(string, vectorAt(alphabet, i), 0);
+        
+        while(index >= 0)
+        {
+            tokens[index] = vectorAt(alphabet, i);
+            index = indexSubStr(string, vectorAt(alphabet, i), index + 1);
+        }
+    }
+    
+    for(int i = 0; i < DFA_MAX_STRING; i++)
+    {
+        if(tokens[i] != NULL)
+        {
+            vectorInsert(hVector, tokens[i]);
+        }
+    }
+    
+    return hVector;
+}
+
+int indexSubStr(char* haystack, char* needle, int startIndex)
+{
+    for(int i = startIndex; i < strlen(haystack); i++)
+    {   
+        for(int j = 0; j < strlen(needle); j++)
+        {
+            if(needle[j] != haystack[i+j])
+                break;
+            if(j + 1 == strlen(needle))
+                return i;
+        }
+    }
+    
+    return -1;
+}
+
+bool checkInvalidStrings(VECTOR alphabet, char* str)
+{
+    if(!alphabet)
+    {
+        fprintf(stderr, "checkInvalidStrings - Invalid alphabet vector\n");
+        return false;
+    }
+    
+    char string[DFA_MAX_STRING];
+    memset(string, 0, DFA_MAX_STRING);
+    
+    strncpy(string, str, DFA_MAX_STRING);
+    
+    for(int i = 0; i < vectorGetSize(alphabet); i++)
+    {
+        int index = indexSubStr(string, vectorAt(alphabet, i), 0);
+        
+        while(index >= 0)
+        {
+            // for(int j = 0; j < strlen(vectorAt(alphabet, i)); j++)
+            //     string[index + j] = '\0';
+                
+            for(int j = index + strlen(vectorAt(alphabet, i)); j < strlen(string); j++)
+                string[j - strlen(vectorAt(alphabet, i))] = string[j];
+                
+            for(int j = strlen(string) - strlen(vectorAt(alphabet, i)); j < strlen(string); j++)
+                string[j] = '\0';
+            
+            index = indexSubStr(string, vectorAt(alphabet, i), index);
+        }
+    }
+
+    if(strncmp(string, "", strlen(string)) == 0)
+        return true;
+        
+    return false;
 }

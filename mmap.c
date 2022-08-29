@@ -204,6 +204,18 @@ bool mmapRemove(MMAP* hNode, char* key)
     return false;
 }
 
+void mmapKeys(MMAP hNode, VECTOR hVector)
+{
+    Node* pNode = (Node*)hNode;
+    if(pNode)
+    {
+        vectorInsert(hVector, pNode->key);
+        
+        return mmapKeys((MMAP)pNode->left, hVector);
+        return mmapKeys((MMAP)pNode->right, hVector);
+    }
+}
+
 MAP mmapFind(MMAP hNode, char* key)
 {
     Node* pNode = (Node*)hNode;

@@ -191,8 +191,9 @@ bool vectorExpand(Vector* pVector)
 		if(!temp[i])
 		{
 			fprintf(stderr, "vectorExpand - Failed to allocate new string locations. Vector invalid after %d\n", i);
-			return false;	
+			return false;
 		}
+		memset(temp[i], 0, VECTOR_MAX_STRING);
 	}
 	
 	pVector->arr = temp;

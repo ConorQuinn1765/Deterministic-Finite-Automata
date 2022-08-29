@@ -177,6 +177,30 @@ bool mapRemove(MAP* hNode, char* key)
     return false;
 }
 
+void mapKeys(MAP hNode, VECTOR keys)
+{
+    Node* pNode = (Node*)hNode;
+    if(pNode)
+    {
+        vectorInsert(keys, pNode->key);
+        
+        mapKeys((MAP)pNode->left, keys);
+        mapKeys((MAP)pNode->right, keys);
+    }
+}
+
+void mapValues(MAP hNode, VECTOR values)
+{
+    Node* pNode = (Node*)hNode;
+    if(pNode)
+    {
+        vectorInsert(values, pNode->value);
+        
+        mapValues((MAP)pNode->left, values);
+        mapValues((MAP)pNode->right, values);
+    }
+}
+
 char* mapFind(MAP hNode, char* key)
 {
     Node* pNode = (Node*)hNode;
