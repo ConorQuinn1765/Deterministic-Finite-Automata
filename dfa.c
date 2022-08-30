@@ -22,7 +22,6 @@ typedef struct
  *     Helper Function Declarations     *
 *****************************************/
 Dfa* readFile(Dfa* pDfa, char* filename);
-void printTransitions(Dfa* pDfa);
 VECTOR tokenizeString(char* string, VECTOR alphabet);
 int indexSubStr(char* haystack, char* needle, int startIndex);
 bool checkInvalidStrings(VECTOR alphabet, char* str);
@@ -165,8 +164,7 @@ void dfaPrint(DFA hDfa)
         vectorPrint(pDfa->finalStates);
         
         printf("\n\nTransitions:\n");
-        printTransitions(pDfa);
-        //mmapInOrderTraversal(pDfa->transitions);
+        mmapInOrderTraversal(pDfa->transitions);
         printf("================= END DFA DEFINITION =================\n");
     }
 }
@@ -260,34 +258,6 @@ Dfa* readFile(Dfa* pDfa, char* filename)
     fclose(fp);
     
     return pDfa;
-}
-
-void printTransitions(Dfa* pDfa)
-{
-    if(pDfa)
-    {
-        VECTOR keys = vectorInit();
-        
-        mmapKeys(pDfa->transitions, keys);
-        
-        for(int i = 0; i < vectorGetSize(keys); i++)
-        {
-            MAP hMap = mmapFind(pDfa->transitions, vectorAt(keys, i));
-            VECTOR tempKeys = vectorInit();
-            VECTOR tempValues = vectorInit();
-            
-            mapKeys(hMap, tempKeys);
-            mapValues(hMap, tempValues);
-            
-            for(int j = 0; j < vectorGetSize(tempKeys); j++)
-                printf("%s  %s  %s\n", vectorAt(keys, i), vectorAt(tempKeys, j), vectorAt(tempValues, j));
-            
-            vectorDestroy(&tempKeys);
-            vectorDestroy(&tempValues);
-        }
-        
-        vectorDestroy(&keys);
-    }
 }
 
 VECTOR tokenizeString(char* string, VECTOR alphabet)

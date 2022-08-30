@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    DFA dfa = dfaInit(argv[1], false);
+    DFA dfa = dfaInit(argv[1], true);
     
     FILE* fp = fopen(argv[2], "r");
     if(!fp)
