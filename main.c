@@ -22,17 +22,15 @@ int main(int argc, char* argv[])
         return 2;
     }
     
-    char line[1024];
-    memset(line, 0, 1024);
-    
-    while(fgets(line, 1024, fp))
+    char line[16384] = {0};
+    while(fgets(line, 16384, fp))
     {
         char* c = strrchr(line, '\n');
         if(c)
             *c = '\0';
         
         dfaAccepts(dfa, line);
-        memset(line, 0, 1024);
+        memset(line, 0, 16384);
     }
     
     fclose(fp);

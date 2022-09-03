@@ -3,7 +3,7 @@
 #include <string.h>
 #include "vector.h"
 
-const int VECTOR_MAX_STRING = 1024;
+const int VECTOR_MAX_STRING = 16384;
 
 typedef struct vector
 {

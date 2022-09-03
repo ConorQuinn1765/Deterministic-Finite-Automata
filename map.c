@@ -3,7 +3,7 @@
 #include <string.h>
 #include "map.h"
 
-const int MAP_MAX_STRING = 1024;
+const int MAP_MAX_STRING = 16384;
 
 typedef struct node Node;
 

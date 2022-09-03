@@ -6,7 +6,7 @@
 #include "map.h"
 #include "vector.h"
 
-const int DFA_MAX_STRING = 1024;
+const int DFA_MAX_STRING = 16384;
 
 typedef struct
 {
@@ -75,10 +75,7 @@ DFA dfaInit(char* filename, bool verbose)
     }
     
     dfa = readFile(dfa, filename);
-    
-    dfaPrint(dfa);
-    printf("\n");
-    
+   
     if(verbose)
     {
         dfaPrint(dfa);

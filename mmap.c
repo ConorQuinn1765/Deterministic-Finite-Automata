@@ -3,7 +3,7 @@
 #include <string.h>
 #include "mmap.h"
 
-const int MMAP_MAX_STRING = 1024;
+const int MMAP_MAX_STRING = 16384;
 
 typedef struct node Node;
 
