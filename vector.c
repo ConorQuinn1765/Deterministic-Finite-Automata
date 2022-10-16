@@ -3,7 +3,7 @@
 #include <string.h>
 #include "vector.h"
 
-const int VECTOR_MAX_STRING = 16384;
+const int VECTOR_MAX_STRING = 1024;
 
 typedef struct vector
 {
@@ -30,23 +30,11 @@ VECTOR vectorInit(void)
 		{
 			fprintf(stderr, "vectorInit - Failed to allocate space for vector array\n");
 			free(pVector);
+			return NULL;
 		}
 		
 		for(int i = 0; i < pVector->capacity; i++)
-		{
-			pVector->arr[i] = malloc(sizeof(char) * VECTOR_MAX_STRING);
-			if(!pVector->arr[i])
-			{
-				fprintf(stderr, "vectorInit - Failed to allocate space for all strings in the vector\n");
-				for(int j = 0; j < i; j++)
-				{
-					free(pVector->arr[j]);
-				}
-				free(pVector);
-				return NULL;
-			}
-			memset(pVector->arr[i], 0, VECTOR_MAX_STRING);
-		}
+			pVector->arr[i] = NULL;
 	}
 	return (VECTOR)pVector;
 }
@@ -63,6 +51,14 @@ bool vectorInsert(VECTOR hVector, char* data)
 	if(pVector->size >= pVector->capacity)
 		vectorExpand(pVector);
 	
+	pVector->arr[pVector->size] = malloc(sizeof(char) * VECTOR_MAX_STRING);
+	if(!pVector->arr[pVector->size])
+	{
+		fprintf(stderr, "vectorInsert - Failed to allocate space for string\n");
+		return false;
+	}
+	
+	memset(pVector->arr[pVector->size], 0, VECTOR_MAX_STRING);
 	strncpy(pVector->arr[pVector->size], data, strlen(data));
 	pVector->size++;
 	return true;
@@ -77,13 +73,20 @@ bool vectorInsertPos(VECTOR hVector, char* data, int index)
 		return false;
 	}
 	
-	if(pVector->size >= pVector->capacity)
-		vectorExpand(pVector);
-	
 	if(index < 0 || index >= pVector->capacity)
 	{
 		fprintf(stderr, "vectorInsertPos - Invalid index %d\n", index);
 		return false;	
+	}
+	
+	if(pVector->size >= pVector->capacity)
+		vectorExpand(pVector);
+	
+	pVector->arr[index] = malloc(sizeof(char) * VECTOR_MAX_STRING);
+	if(!pVector->arr[index])
+	{
+		fprintf(stderr, "vectorInsertPos - Failed to allocate space for string\n");
+		return false;
 	}
 	
 	strncpy(pVector->arr[index], data, strlen(data));
@@ -96,11 +99,13 @@ bool vectorRemove(VECTOR hVector, char* data)
 	Vector* pVector = (Vector*)hVector;
 	
 	if(pVector)
-	{	
+	{
 		for(int i = 0; i < pVector->size; i++)
 		{
 			if(strncmp(pVector->arr[i], data, strlen(data)) == 0)
 			{
+				free(pVector->arr[i]);
+				
 				vectorShift(pVector, i);
 				if(pVector->size < pVector->capacity / 2)
 					vectorShrink(pVector);
@@ -147,7 +152,7 @@ void vectorPrint(VECTOR hVector)
 	if(pVector)
 	{
 		for(int i = 0; i < pVector->size; i++)
-			printf("%s ", pVector->arr[i]);
+			printf("%s\n", pVector->arr[i]);
 	}
 }
 
@@ -157,7 +162,8 @@ void vectorDestroy(VECTOR* phVector)
 	if(pVector)
 	{
 		for(int i = 0; i < pVector->capacity; i++)
-			free(pVector->arr[i]);
+			if(pVector->arr[i])
+				free(pVector->arr[i]);
 
 		free(pVector->arr);
 		free(pVector);
@@ -186,15 +192,7 @@ bool vectorExpand(Vector* pVector)
 	}
 	
 	for(int i = pVector->size; i < pVector->capacity * 2; i++)
-	{
-		temp[i] = malloc(sizeof(char) * VECTOR_MAX_STRING);
-		if(!temp[i])
-		{
-			fprintf(stderr, "vectorExpand - Failed to allocate new string locations. Vector invalid after %d\n", i);
-			return false;
-		}
-		memset(temp[i], 0, VECTOR_MAX_STRING);
-	}
+		temp[i] = NULL;
 	
 	pVector->arr = temp;
 	pVector->capacity *= 2;
@@ -218,18 +216,10 @@ bool vectorShrink(Vector* pVector)
 		temp = realloc(pVector->arr, sizeof(char*) * (pVector->capacity / 2));
 		if(!temp)
 		{
-			
 			fprintf(stderr, "Failed to shrink the vector\n");
 			
 			for(int i = pVector->capacity / 2; i < pVector->capacity; i++)
-			{
-				pVector->arr[i] = malloc(sizeof(char) * VECTOR_MAX_STRING);
-				if(!pVector->arr[i])
-				{
-					fprintf(stderr, "vectorShrink - Failed to reallocate freed string locations. Vector invalid after index %d\n", i);
-					return false;	
-				}
-			}
+				pVector->arr[i] = NULL;
 			
 			return false;
 		}
@@ -252,9 +242,7 @@ bool vectorShrink(Vector* pVector)
 bool vectorShift(Vector* pVector, int index)
 {
 	if(pVector && index > 0 && index < pVector->size)
-	{
-		memset(pVector->arr[index], 0, strlen(pVector->arr[index]));
-		//pVector->itemDestroy(&pVector->arr[index]);
+	{	
 		for(; index < pVector->size - 1; index++)
 			pVector->arr[index] = pVector->arr[index + 1];
 
@@ -266,4 +254,3 @@ bool vectorShift(Vector* pVector, int index)
 	
 	return false;
 }
-

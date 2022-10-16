@@ -6,7 +6,7 @@
 #include "map.h"
 #include "vector.h"
 
-const int DFA_MAX_STRING = 16384;
+const int DFA_MAX_STRING = 1024;
 
 typedef struct
 {
@@ -96,12 +96,7 @@ bool dfaAccepts(DFA hDfa, char* string)
             return false;
         }
         
-        char* currState = malloc(sizeof(char) * DFA_MAX_STRING);
-        if(!currState)
-        {
-            fprintf(stderr, "dfaAccepts - Failed to create string\n");
-            return false;
-        }
+        char currState[DFA_MAX_STRING];
         memset(currState, 0, DFA_MAX_STRING);
         strncpy(currState, pDfa->startState, strlen(pDfa->startState));
         
@@ -125,16 +120,12 @@ bool dfaAccepts(DFA hDfa, char* string)
         {
             if(strncmp(currState, vectorAt(pDfa->finalStates, i), strlen(currState)) == 0)
             {
-                free(currState);
-                
                 printf("%s --> Accepts\n", string);
                 if(pDfa->verbose)
                     printf("\n");
                 return true;
             }
         }
-        
-        free(currState);
     }
     
     printf("%s --> Not Accepts\n", string);
@@ -323,9 +314,6 @@ bool checkInvalidStrings(VECTOR alphabet, char* str)
         
         while(index >= 0)
         {
-            // for(int j = 0; j < strlen(vectorAt(alphabet, i)); j++)
-            //     string[index + j] = '\0';
-                
             for(int j = index + strlen(vectorAt(alphabet, i)); j < strlen(string); j++)
                 string[j - strlen(vectorAt(alphabet, i))] = string[j];
                 

@@ -1,5 +1,5 @@
 cc = gcc
-cflags = -Wall -Werror --std=c11 -g
+cflags = -Wall -Werror --std=c11 -g -O1
 objs = main.o dfa.o mmap.o map.o vector.o
 exe = run
 

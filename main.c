@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "dfa.h"
-#include "vector.h"
 
 int main(int argc, char* argv[])
 {
@@ -13,7 +12,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    DFA dfa = dfaInit(argv[1], true);
+    DFA dfa = dfaInit(argv[1], false);
     
     FILE* fp = fopen(argv[2], "r");
     if(!fp)
@@ -22,15 +21,15 @@ int main(int argc, char* argv[])
         return 2;
     }
     
-    char line[16384] = {0};
-    while(fgets(line, 16384, fp))
+    char line[1024] = {0};
+    while(fgets(line, 1024, fp))
     {
         char* c = strrchr(line, '\n');
         if(c)
             *c = '\0';
         
         dfaAccepts(dfa, line);
-        memset(line, 0, 16384);
+        memset(line, 0, 1024);
     }
     
     fclose(fp);
